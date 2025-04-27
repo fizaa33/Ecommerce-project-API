@@ -90,7 +90,6 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 
 });
-
 app.UseStaticFiles();
 app.UseRouting();
 

@@ -7,5 +7,11 @@ public class myDbContext : DbContext
 
     public DbSet<UserModel> Users { get; set; }
 
+    public DbSet<Categories> Category { get; set; }
+
+    public DbSet<Products> Products { get; set; }
+
+
+
 
 }

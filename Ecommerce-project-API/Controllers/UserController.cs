@@ -9,6 +9,8 @@ using System.Text;
 using Ecommerce_project_API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Azure;
 
 namespace Ecommerce_project_API.Controllers
 {
@@ -29,10 +31,18 @@ namespace Ecommerce_project_API.Controllers
         }
         [Authorize]
         [HttpGet]
-        public async Task<ActionResult> GetAll()
+        public async Task<ActionResult> GetAllUsers()
         {
             var data = await _context.Users.ToListAsync();
-            return Ok(data);
+
+            var response = new ApiResponse<List<UserModel>>
+            {
+                Message = "Users get successfully.",
+                Status = 200,
+                IsSuccess = true,
+                Data = data
+            };
+            return Ok(response);
         }
 
         [Authorize]
@@ -45,9 +55,27 @@ namespace Ecommerce_project_API.Controllers
             var user = await _context.Users.Where(u => u.Id == userId).Select(u => new { u.Id, u.Name, u.Email }).FirstOrDefaultAsync();
             if (user == null)
             {
-                return NotFound("You are not logged in");
+                return NotFound(new ApiResponse<object>
+                {
+                    Message = "You are not logged in",
+                    Status = 404,
+                    IsSuccess = false,
+                    Errors = new List<string> { "Invalid ID", "Token is misssing" },
+
+                    Data = null
+                });
             }
-            return Ok(user);
+
+            var response = new ApiResponse<object>
+            {
+                Message = "User fetched successfully.",
+                Status = 200,
+                IsSuccess = true,
+                Errors = null,
+
+                Data = user
+            };
+            return Ok(response);
         }
 
         [HttpPost]
@@ -69,7 +97,15 @@ namespace Ecommerce_project_API.Controllers
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            return Ok("Signup successful.");
+            return Ok( new ApiResponse<object>
+            {
+                Message = "User registered successfully.",
+                Status = 200,
+                IsSuccess = true,
+                Errors = null,
+
+                Data = null
+            });
         }
 
 
@@ -82,7 +118,15 @@ namespace Ecommerce_project_API.Controllers
                 return Unauthorized("Invalid email or password");
 
             string token = _authService.GenerateJSONWebToken(user.Id);
-            return Ok(new { Message = "Login Successful", Token = token });
+            return Ok( new ApiResponse<object>
+            {
+                Message = "User Login successfully.",
+                Status = 200,
+                IsSuccess = true,
+                Errors = null,
+
+                Data = token
+            });
         }
 
 
@@ -90,33 +134,64 @@ namespace Ecommerce_project_API.Controllers
 
         [Authorize]
         [HttpPut("{Id}")]
-        public async Task<ActionResult> Update(int Id, AddUserRequest request)
+        public async Task<ActionResult> UpdateUser(int Id, AddUserRequest request)
         {
             var user = await _context.Users.FindAsync(Id);
            
            
-            if (user == null)
-                return NotFound("User not found");
+           if (user == null)
+            {
+                return NotFound(new ApiResponse<object>
+                {
+                    Message = "User Not Found",
+                    Status = 404,
+                    IsSuccess = false,
+                    Data = null
+                });
+            }
+
             user.Name = request.Name;
             user.Email = request.Email;
             user.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-
-            return Ok("User updated successfully.");
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            return Ok( new ApiResponse<object>
+            {
+                Message = "User Updated successfully.",
+                Status = 200,
+                IsSuccess = true,
+                Errors = null,
+                Data = null
+            });
         }
         [Authorize]
         [HttpDelete("{Id}")]
-        public async Task<ActionResult> Delete(int Id)
+        public async Task<ActionResult> DeleteUser(int Id)
         {
 
             var user = await _context.Users.FindAsync(Id);
-
             if (user == null)
-                return NotFound("User not found");
+            {
+                return NotFound(new ApiResponse<object>
+                {
+                    Message = "User Not Found",
+                    Status = 404,
+                    IsSuccess = false,
+                    Data = null
+                });
+            }
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
-            return Ok("User deleted successfully.");
+            return Ok(new ApiResponse<object>
+            {
+                Message = "User Deleted successfully.",
+                Status = 200,
+                IsSuccess = true,
+                Errors = null,
+                Data = null
+            });
         }
     }
 }

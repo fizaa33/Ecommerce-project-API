@@ -25,7 +25,8 @@ public class AuthService
             _config["Jwt:Issuer"],
             new[]
             {
-                new Claim("id", userId.ToString())
+                new Claim("id", userId.ToString()),
+           
             },
             expires: DateTime.Now.AddDays(7),
             signingCredentials: credentials);
@@ -41,4 +42,7 @@ public class AuthService
 
         return int.Parse(userIdClaim.Value);
     }
+
+ 
+
 }

@@ -10,6 +10,9 @@
         public decimal Quantity { get; set; }
         public int CategoryId { get; set; }  // Foreign Key
         public string ImagePath { get; set; }
+        public int SearchCount { get; set; } = 0;
+        public int SoldQuantity { get; set; } = 0;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     }

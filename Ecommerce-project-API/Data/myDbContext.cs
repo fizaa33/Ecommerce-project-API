@@ -11,6 +11,9 @@ public class myDbContext : DbContext
 
     public DbSet<Products> Products { get; set; }
 
+    public DbSet<Wishlist> Wishlist { get; set; }
+
+
 
 
 
